@@ -1,6 +1,6 @@
 import numpy as np
 
-a = np.zeros((2,3,4))
+a = np.random.rand(2,5)
 print(a)
-print(a.shape)
-print(a.shape[-1])
+b = np.sort(a, axis=1)
+print(b)
