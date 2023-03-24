@@ -1,4 +1,4 @@
 import numpy as np
 
-a = np.zeros((2,3))
-print(a)
+test_samples = np.zeros((3,3,5))
+print(len(test_samples))
