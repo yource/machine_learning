@@ -1,7 +1,20 @@
 from tensorflow import keras
 from keras import layers
-import keras_tuner
+import keras_tuner as kt
 import numpy as np
+
+(x, y), (x_test, y_test) = keras.datasets.mnist.load_data()
+x_train = x[:-10000]
+x_val = x[-10000:]
+y_train = y[:-10000]
+y_val = y[-10000:]
+x_train = np.expand_dims(x_train, -1).astype("float32") / 255.0
+x_val = np.expand_dims(x_val, -1).astype("float32") / 255.0
+x_test = np.expand_dims(x_test, -1).astype("float32") / 255.0
+num_classes = 10
+y_train = keras.utils.to_categorical(y_train, num_classes)
+y_val = keras.utils.to_categorical(y_val, num_classes)
+y_test = keras.utils.to_categorical(y_test, num_classes)
 
 def build_model(hp):
     model = keras.Sequential()
@@ -30,50 +43,47 @@ def build_model(hp):
     return model
 
 # 测试build_model是否成功
-# build_model(keras_tuner.HyperParameters())
+# build_model(kt.HyperParameters())
 
-tuner = keras_tuner.RandomSearch( #RandomSearch, BayesianOptimization, Hyperband
-    hypermodel=build_model,
-    objective="val_accuracy", #优化指标
-    max_trials=3, #运行的试验总数
-    executions_per_trial=2, #每次试验的执行次数
-    overwrite=True, #覆盖同一目录中以前的结果 还是继续以前的搜索
-    directory="kt_data", #存储搜索结果的目录的路径
-    project_name="helloworld", #子目录名
+##### RandomSearch #####
+# tuner = kt.RandomSearch(
+#     hypermodel=build_model,
+#     objective="val_accuracy", #优化指标
+#     max_trials=3, #运行的试验总数
+#     executions_per_trial=2, #每次试验的执行次数
+#     overwrite=True, #覆盖同一目录中以前的结果 还是继续以前的搜索
+#     directory="kt_data", #存储搜索结果的目录的路径
+#     project_name="helloworld", #子目录名
+# )
+# tuner.search(x_train, y_train, epochs=2, validation_data=(x_val, y_val))
+
+##### Hyperband #####
+tuner = kt.Hyperband(
+    build_model,
+    objective='val_accuracy',
+    max_epochs=10,
+    factor=3,
+    directory='kt_data',
+    project_name='helloworld'
 )
-# 打印搜索摘要
-tuner.search_space_summary()
+stop_early = keras.callbacks.EarlyStopping(monitor='val_loss', patience=5)
+tuner.search(x_train, y_train, epochs=50, validation_split=0.2, callbacks=[stop_early])
 
-
-(x, y), (x_test, y_test) = keras.datasets.mnist.load_data()
-x_train = x[:-10000]
-x_val = x[-10000:]
-y_train = y[:-10000]
-y_val = y[-10000:]
-x_train = np.expand_dims(x_train, -1).astype("float32") / 255.0
-x_val = np.expand_dims(x_val, -1).astype("float32") / 255.0
-x_test = np.expand_dims(x_test, -1).astype("float32") / 255.0
-num_classes = 10
-y_train = keras.utils.to_categorical(y_train, num_classes)
-y_val = keras.utils.to_categorical(y_val, num_classes)
-y_test = keras.utils.to_categorical(y_test, num_classes)
-
-tuner.search(x_train, y_train, epochs=2, validation_data=(x_val, y_val))
-
-# # 检索最佳模型
-# models = tuner.get_best_models(num_models=2)
-# best_model = models[0]
-# # Build the model.
-# # Needed for `Sequential` without specified `input_shape`.
-# best_model.build(input_shape=(None, 28, 28))
-# best_model.summary()
-
-# 重新训练模型
-# Get the top 2 hyperparameters.
-best_hps = tuner.get_best_hyperparameters(5)
-# Build the model with the best hp.
-model = build_model(best_hps[0])
-# Fit with the entire dataset.
+# 使用从搜索中获得的超参数找到训练模型的最佳周期数
+best_hp=tuner.get_best_hyperparameters(num_trials=1)[0]
+model = build_model(best_hp)
 x_all = np.concatenate((x_train, x_val))
 y_all = np.concatenate((y_train, y_val))
-model.fit(x=x_all, y=y_all, epochs=1)
+history = model.fit(x=x_all, y=y_all, epochs=1, epochs=50, validation_split=0.2)
+val_acc_per_epoch = history.history['val_accuracy']
+best_epoch = val_acc_per_epoch.index(max(val_acc_per_epoch)) + 1
+print('Best epoch: %d' % (best_epoch,))
+
+# 重新实例化超模型并使用上面的最佳周期数对其进行训练
+hypermodel = build_model(best_hp)
+hypermodel.fit(x_all, y_all, epochs=best_epoch, validation_split=0.2)
+# 保存模型
+hypermodel.save("./model/mnist")
+# 重新加载模型
+newModel = keras.models.load_model("./model/mnist")
+print(newModel.summary())
