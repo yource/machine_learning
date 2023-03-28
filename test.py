@@ -1,5 +1,6 @@
 import numpy as np
+import pandas as pd
 
-a = np.zeros((10,5))
-
-print(len(a))
+a = [1,2]
+a.append(3)
+print(a)
