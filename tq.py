@@ -7,7 +7,7 @@ SHFE 上期所 上海期货交易所
     沥青bu 燃油fu 热卷hc 橡胶ru 纸浆sp 螺纹钢rb 不锈钢ss 线材wr
 
 DCE 大商所 大连商品交易所
-    豆一a 豆二b 玉米c 淀粉cs 鸡蛋jd 生猪lh 豆粕m 棕榈油p 粳米rr 豆油y
+    豆一a 豆二b 豆油y 豆粕m 玉米c 淀粉cs 鸡蛋jd 生猪lh 棕榈油p 粳米rr 
     胶合板bb 纤维板fb 塑料l 苯乙烯eb 乙二醇eg LPG(液化石油气)pg 聚丙烯pp PVC(聚氯乙烯)v 
     铁矿石i 焦炭j 焦煤jm 
     
@@ -18,6 +18,13 @@ CZCE 郑商所 郑州商品交易所
 
 INE 上期能源 上海能源中心
     国际铜bc 低硫燃油lu 20号胶nr 原油sc
+
+CFFEX 中国金融交易所
+KQ 快期 (所有主连合约, 指数都归属在这里)
+SSWE 上期所仓单
+SSE 上海证券交易所
+SZSE 深圳证券交易所
+GFEX 广州期货交易所
 
 期货品种分类：
 1. 金属板块：

@@ -1,43 +1,8 @@
-'''
-SHFE 上期所 上海期货交易所
-    沪金au 沪银ag 沪铝au 沪铜cu 沪镍ni 沪铅pb 沪锡sn  沪锌zn
-    沥青bu 燃油fu 热卷hc 橡胶ru 纸浆sp 螺纹钢rb 不锈钢ss 线材wr
-
-DCE 大商所 大连商品交易所
-    豆一a 豆二b 玉米c 淀粉cs 鸡蛋jd 生猪lh 豆粕m 棕榈油p 粳米rr 豆油y
-    胶合板bb 纤维板fb 塑料l 苯乙烯eb 乙二醇eg LPG(液化石油气)pg 聚丙烯pp PVC(聚氯乙烯)v 
-    铁矿石i 焦炭j 焦煤jm 
-    
-CZCE 郑商所 郑州商品交易所
-    苹果AP 红枣CJ 粳稻JR 晚籼稻LR 菜油OI 花生PK 普麦PM 早籼稻RI 菜粕RM 菜籽RS 强麦WH 
-    甲醇MA 纯碱SA 硅铁SF 锰硅SM  PTA(精对苯二甲酸)TA 尿素UR
-    棉纱CY 棉花CF 玻璃FG 短纤PF 白糖SR 动力煤ZC 
-
-INE 上期能源 上海能源中心
-    国际铜bc 低硫燃油lu 20号胶nr 原油sc
-'''
-
 from datetime import datetime, date
 from contextlib import closing
 from tqsdk import TqApi, TqAuth, TqSim
 from tqsdk.tools import DataDownloader
 
-types = [
-    {
-        "name": "黑色金属", #板块，作文件夹名
-        "list": [
-            {
-                "name":"铁矿石", 
-                "exchange":"DCE", #交易所
-                "code":"i", #代码
-                "main": ["01","05","09"],
-                "list": ['1405',]
-            }
-        ]
-    }
-]
-
-# 每个月都是主力: 不锈钢/沪铜
 contracts = [
     {
         "type":"黑色金属", "name":"铁矿石", "code":"i", "exchange":"DCE", 
@@ -66,16 +31,95 @@ contracts = [
     }
 ]
 
+# 各种类主连5分钟
 contractMain = [
-    {}
+    { "type":"黑色金属", "name":"铁矿石", "code":"i", "exchange":"DCE" },
+    { "type":"黑色金属", "name":"螺纹钢", "code":"rb", "exchange":"SHFE" },
+    { "type":"黑色金属", "name":"热卷", "code":"hc", "exchange":"SHFE" },
+    { "type":"黑色金属", "name":"不锈钢", "code":"ss", "exchange":"SHFE" },
+    { "type":"黑色金属", "name":"硅铁", "code":"SF", "exchange":"CZCE" },
+    { "type":"黑色金属", "name":"锰硅", "code":"SM", "exchange":"CZCE" },
+    { "type":"有色金属", "name":"沪铜", "code":"cu", "exchange":"SHFE" },
+    { "type":"有色金属", "name":"沪铝", "code":"al", "exchange":"SHFE" },
+    { "type":"有色金属", "name":"沪锌", "code":"zn", "exchange":"SHFE" },
+    { "type":"有色金属", "name":"沪铅", "code":"pb", "exchange":"SHFE" },
+    { "type":"有色金属", "name":"沪镍", "code":"ni", "exchange":"SHFE" },
+    { "type":"有色金属", "name":"沪锡", "code":"sn", "exchange":"SHFE" },
+    { "type":"有色金属", "name":"国际铜", "code":"bc", "exchange":"INE" },
+    { "type":"有色金属", "name":"工业硅", "code":"si", "exchange":"GFEX" },
+    { "type":"贵金属", "name":"沪金", "code":"au", "exchange":"SHFE" },
+    { "type":"贵金属", "name":"沪银", "code":"ag", "exchange":"SHFE" },
+    { "type":"油脂油料", "name":"豆一", "code":"a", "exchange":"DCE" },
+    { "type":"油脂油料", "name":"豆二", "code":"b", "exchange":"DCE" },
+    { "type":"油脂油料", "name":"豆油", "code":"y", "exchange":"DCE" },
+    { "type":"油脂油料", "name":"豆粕", "code":"m", "exchange":"DCE" },
+    { "type":"油脂油料", "name":"棕榈油", "code":"p", "exchange":"DCE" },
+    { "type":"油脂油料", "name":"菜油", "code":"OI", "exchange":"CZCE" },
+    { "type":"油脂油料", "name":"菜粕", "code":"RM", "exchange":"CZCE" },
+    { "type":"农产品", "name":"玉米", "code":"c", "exchange":"DCE" },
+    { "type":"农产品", "name":"淀粉", "code":"cs", "exchange":"DCE" },
+    { "type":"农产品", "name":"鸡蛋", "code":"jd", "exchange":"DCE" },
+    { "type":"农产品", "name":"棉花", "code":"CF", "exchange":"CZCE" },
+    { "type":"农产品", "name":"面纱", "code":"CY", "exchange":"CZCE" },
+    { "type":"农产品", "name":"苹果", "code":"AP", "exchange":"CZCE" },
+    { "type":"农产品", "name":"红枣", "code":"CJ", "exchange":"CZCE" },
+    { "type":"农产品", "name":"花生", "code":"PK", "exchange":"CZCE" },
+    { "type":"农产品", "name":"粳米", "code":"rr", "exchange":"DCE" },
+    { "type":"农产品", "name":"生猪", "code":"lh", "exchange":"DCE" },
+    { "type":"农产品", "name":"白糖", "code":"SR", "exchange":"CZCE" },
+    { "type":"能源化工", "name":"原油", "code":"sc", "exchange":"INE" },
+    { "type":"能源化工", "name":"LPG", "code":"pg", "exchange":"DCE" },
+    { "type":"能源化工", "name":"低硫燃油", "code":"lu", "exchange":"INE" },
+    { "type":"能源化工", "name":"沥青", "code":"bu", "exchange":"SHFE" },
+    { "type":"能源化工", "name":"甲醇", "code":"MA", "exchange":"CZCE" },
+    { "type":"能源化工", "name":"乙二醇", "code":"eg", "exchange":"DCE" },
+    { "type":"能源化工", "name":"塑料", "code":"l", "exchange":"DCE" },
+    { "type":"能源化工", "name":"PTA", "code":"TA", "exchange":"CZCE" },
+    { "type":"能源化工", "name":"聚丙烯", "code":"pp", "exchange":"DCE" },
+    { "type":"能源化工", "name":"苯乙烯", "code":"eb", "exchange":"DCE" },
+    { "type":"能源化工", "name":"尿素", "code":"UR", "exchange":"CZCE" },
+    { "type":"能源化工", "name":"橡胶", "code":"ru", "exchange":"SHFE" },
+    { "type":"能源化工", "name":"20号胶", "code":"nr", "exchange":"INE" },
+    { "type":"能源化工", "name":"纸浆", "code":"sp", "exchange":"SHFE" },
+    { "type":"能源化工", "name":"短纤", "code":"PF", "exchange":"CZCE" },
+    { "type":"能源化工", "name":"燃油", "code":"fu", "exchange":"SHFE" },
+    { "type":"能源化工", "name":"PVC", "code":"v", "exchange":"DCE" },
+    { "type":"能源化工", "name":"纯碱", "code":"SA", "exchange":"CZCE" },
+    { "type":"能源化工", "name":"玻璃", "code":"FG", "exchange":"CZCE" },
+    { "type":"煤炭板块", "name":"焦煤", "code":"jm", "exchange":"DCE" },
+    { "type":"煤炭板块", "name":"焦炭", "code":"j", "exchange":"DCE" },
 ]
 
 api = TqApi(auth=TqAuth("18655533530", "YangXiang88"))
-download_tasks = {}
-download_tasks["rb1805"] = DataDownloader(api, symbol_list="SHFE.rb1805", dur_sec=24*60*60,
-                    start_dt=date(2018, 1, 1), end_dt=date(2018, 9, 1), csv_file_name="./data/test/rb1805.csv")
+# 下载从 2018-01-01 到 2018-09-01 的 SR901 日线数据
+# download_tasks["SR_daily"] = DataDownloader(api, symbol_list="CZCE.SR901", dur_sec=24*60*60,
+#                     start_dt=date(2018, 1, 1), end_dt=date(2018, 9, 1), csv_file_name="SR901_daily.csv")
+# # 下载从 2017-01-01 到 2018-09-01 的 rb主连 5分钟线数据
+# download_tasks["rb_5min"] = DataDownloader(api, symbol_list="KQ.m@SHFE.rb", dur_sec=5*60,
+#                     start_dt=date(2017, 1, 1), end_dt=date(2018, 9, 1), csv_file_name="rb_5min.csv")
 
-with closing(api):
-    while not all([v.is_finished() for v in download_tasks.values()]):
+def getDownloader(ct):
+    return DataDownloader(api, dur_sec=5*60,
+                          symbol_list="KQ.m@"+ct["exchange"]+"."+ct["code"],
+                          start_dt=date(2016, 1, 1),end_dt=date(2023, 3, 29), 
+                          csv_file_name="./data/main5min/"+ct["code"]+"_main_5min.csv")
+maxIdx = len(contractMain)-1
+curIdx = 0
+download_task= getDownloader(contractMain[0])
+while (curIdx>maxIdx):
         api.wait_update()
-        print("progress: ", { k:("%.2f%%" % v.get_progress()) for k,v in download_tasks.items() })
+        if download_task.is_finished():
+            curIdx += 1
+            if curIdx<=maxIdx:
+                download_task= getDownloader(contractMain[curIdx])
+                print("开始下载 "+contractMain[curIdx]["name"])
+            else:
+                print("下载完成～")
+        else:
+            print("["+(curIdx+1)+"/"+(maxIdx+1)+"]"+contractMain[curIdx]["name"]+": ", download_task.get_progress())
+closing(api)
+# download_task= getDownloader(contractMain[len(contractMain)-1])
+# with closing(api):
+#     while not download_task.is_finished():
+#         api.wait_update()
+#         print("progress: ", download_task.get_progress())
