@@ -22,34 +22,40 @@ df = dataframe.dropna()
 # plot_features.plot()
 # plt.show()
 
-# 选取数据和特征工程 将日期转为一个周期中的某一天/一年中的某一天
-symbols = df.pop('symbol')
+# 选取数据
 df = df[['open','close','high','low','volume','open_interest','money']]
 n = len(df)
-cur_symbol = ""
-cur_symbol_len = 0
-feature_date = np.zeros(n)
-symbol_len_list = []
-for i,sy in enumerate(symbols):
-    if(sy!=cur_symbol): 
-        cur_symbol = sy
-        if(cur_symbol_len>0):
-            symbol_len_list.append(cur_symbol_len)
-        cur_symbol_len = 1
-    else: 
-        cur_symbol_len += 1
-lenlist = np.array(symbol_len_list)
-print("symbol_len_list",symbol_len_list)
-print("n",n)
-print(lenlist.sum())
-print(len(lenlist))
 
-#拆分数据
-# train_len = int(n*0.7)
-# val_len = int(n*0.9)
-# test_len = n-train_len-val_len
-# train_df = df[0:train_len]
-# val_df = df[train_len:val_len]
-# test_df = df[val_len:]
-# num_features = df.shape[1]
-# print(num_features)
+# 特征工程 将日期转为一个周期中的某一天/一年中的某一天
+# symbols = df.pop('symbol')
+# cur_symbol = ""
+# cur_symbol_len = 0
+# feature_date = np.zeros(n)
+# symbol_len_list = []
+# for i,sy in enumerate(symbols):
+#     if(sy!=cur_symbol): 
+#         cur_symbol = sy
+#         if(cur_symbol_len>0):
+#             symbol_len_list.append(cur_symbol_len)
+#         cur_symbol_len = 1
+#     else: 
+#         cur_symbol_len += 1
+# lenlist = np.array(symbol_len_list)
+
+# 拆分数据 训练集、验证集、测试集
+train_len = int(n*0.7)
+train_df = df[0:train_len]
+val_len = int(n*0.9)
+val_df = df[train_len:val_len]
+test_len = n-train_len-val_len
+test_df = df[val_len:]
+
+# 归一化数据 减去平均值、除以标准差
+train_mean = train_df.mean()
+train_std = train_df.std()
+train_df = (train_df - train_mean) / train_std
+val_df = (val_df - train_mean) / train_std
+test_df = (test_df - train_mean) / train_std
+
+print(type(test_df))
+print(test_df.head)
