@@ -5,31 +5,71 @@ from tqsdk.tools import DataDownloader
 
 contracts = [
     {
-        "type":"黑色金属", "name":"铁矿石", "code":"i", "exchange":"DCE", 
+        "type":"农产品", "name":"鸡蛋", "code":"jd", "exchange":"DCE", 
+        "list":["1605","1609",
+                "1701","1705","1709","1801","1805","1809","1901","1905","1909",
+                "2001","2005","2009","2101","2105","2109","2201","2205","2209",
+                "2301","2305"]
+    },
+    {
+        "type":"农产品", "name":"玉米", "code":"c", "exchange":"DCE",
+        "list":["1605","1609",
+                "1701","1705","1709","1801","1805","1809","1901","1905","1909",
+                "2001","2005","2009","2101","2105","2109","2201","2205","2209",
+                "2301","2305"]
+    },
+    {
+        "type":"农产品", "name":"淀粉", "code":"cs", "exchange":"DCE",
+        "list":["1605","1609",
+                "1701","1705","1709","1801","1805","1809","1901","1905","1909",
+                "2001","2005","2009","2101","2105","2109","2201","2205","2209",
+                "2301","2305"]
+    },
+    { 
+        "type":"黑色金属", "name":"热卷", "code":"hc", "exchange":"SHFE",
+        "list":["1605","1610",
+                "1701","1705","1710","1801","1805","1810","1901","1905","1910",
+                "2001","2005","2010","2101","2105","2110","2201","2205","2210",
+                "2301","2305"]
+    },
+    {
+        "type":"黑色金属", "name":"螺纹钢", "code":"rb", "exchange":"SHFE",
+        "list":["1605","1610",
+                "1701","1705","1710","1801","1805","1810","1901","1905","1910",
+                "2001","2005","2010","2101","2105","2110","2201","2205","2210",
+                "2301","2305"]
+    },
+    {
+        "type":"煤炭板块", "name":"焦煤", "code":"jm", "exchange":"DCE",
+        "list":["1605","1609",
+                "1701","1705","1709","1801","1805","1809","1901","1905","1909",
+                "2001","2005","2009","2101","2105","2109","2201","2205","2209",
+                "2301","2305"]
+    },
+    {
+        "type":"煤炭板块", "name":"焦炭", "code":"j", "exchange":"DCE",
         "list":["1605","1609",
                 "1701","1705","1709","1801","1805","1809","1901","1905","1909",
                 "2001","2005","2009","2101","2105","2109","2201","2205","2209",
                 "2301","2305"]
     },{
-        "type":"黑色金属", "name":"螺纹钢", "code":"rb", "exchange":"SHFE", 
-        "list":["1605","1610",
-                "1701","1705","1710","1801","1805","1810","1901","1905","1910",
-                "2001","2005","2010","2101","2105","2110","2201","2205","2210",
-                "2301","2305"]
-    },{
-        "type":"黑色金属", "name":"热卷", "code":"hc", "exchange":"SHFE", 
-        "list":["1605","1610",
-                "1701","1705","1710","1801","1805","1810","1901","1905","1910",
-                "2001","2005","2010","2101","2105","2110","2201","2205","2210",
-                "2301","2305"]
-    },{
-        "type":"有色金属", "name":"沪铜", "code":"cu", "exchange":"SHFE", 
-        "list":["1605","1610",
-                "1701","1705","1710","1801","1805","1810","1901","1905","1910",
-                "2001","2005","2010","2101","2105","2110","2201","2205","2210",
+        "type":"黑色金属", "name":"铁矿石", "code":"i", "exchange":"DCE",
+        "list":["1605","1609",
+                "1701","1705","1709","1801","1805","1809","1901","1905","1909",
+                "2001","2005","2009","2101","2105","2109","2201","2205","2209",
                 "2301","2305"]
     }
 ]
+contractList = []
+for m,item in enumerate(contracts):
+    for n,subItem in enumerate(item["list"]):
+        contractList.append({
+            "exchange": item["exchange"],
+            "name": item["name"],
+            "code": item["code"]+subItem
+        })
+
+# print("contractList",contractList)
 
 # 各种类主连5分钟
 contractMain = [
@@ -91,35 +131,39 @@ contractMain = [
 ]
 
 api = TqApi(auth=TqAuth("18655533530", "YangXiang88"))
+
+# 下载示例
+# download_tasks={}
 # 下载从 2018-01-01 到 2018-09-01 的 SR901 日线数据
 # download_tasks["SR_daily"] = DataDownloader(api, symbol_list="CZCE.SR901", dur_sec=24*60*60,
 #                     start_dt=date(2018, 1, 1), end_dt=date(2018, 9, 1), csv_file_name="SR901_daily.csv")
-# # 下载从 2017-01-01 到 2018-09-01 的 rb主连 5分钟线数据
-# download_tasks["rb_5min"] = DataDownloader(api, symbol_list="KQ.m@SHFE.rb", dur_sec=5*60,
-#                     start_dt=date(2017, 1, 1), end_dt=date(2018, 9, 1), csv_file_name="rb_5min.csv")
+# 下载从 2017-01-01 到 2018-09-01 的 rb主连 5分钟线数据
+# download_tasks["j1901_5min"] = DataDownloader(api, symbol_list="DCE.j1901", dur_sec=5*60,
+#                     start_dt=date(2016, 1, 1),end_dt=date(2023, 3, 29),  csv_file_name="./data/test/j1901_5min.csv")
+# with closing(api):
+#     while not all([v.is_finished() for v in download_tasks.values()]):
+#         api.wait_update()
+#         print("progress: ", { k:("%.2f%%" % v.get_progress()) for k,v in download_tasks.items() })
 
 def getDownloader(ct):
-    return DataDownloader(api, dur_sec=5*60,
-                          symbol_list="KQ.m@"+ct["exchange"]+"."+ct["code"],
-                          start_dt=date(2016, 1, 1),end_dt=date(2023, 3, 29), 
-                          csv_file_name="./data/main5min/"+ct["code"]+"_main_5min.csv")
-maxIdx = len(contractMain)-1
+    return DataDownloader(api, dur_sec = 5*60,
+                          symbol_list = ct["exchange"]+"."+ct["code"],
+                          start_dt = date(2016, 1, 1), end_dt = date(2023, 3, 29), 
+                          csv_file_name = "./data/contract5min/"+ct["code"]+"_5min.csv")
+
+maxIdx = len(contractList)-1
 curIdx = 0
-download_task= getDownloader(contractMain[0])
-while (curIdx>maxIdx):
+download_task= getDownloader(contractList[0])
+with closing(api):
+    while (curIdx<=maxIdx):
         api.wait_update()
         if download_task.is_finished():
             curIdx += 1
             if curIdx<=maxIdx:
-                download_task= getDownloader(contractMain[curIdx])
-                print("开始下载 "+contractMain[curIdx]["name"])
+                download_task= getDownloader(contractList[curIdx])
+                print("开始下载 "+contractList[curIdx]["name"])
             else:
                 print("下载完成～")
         else:
-            print("["+(curIdx+1)+"/"+(maxIdx+1)+"]"+contractMain[curIdx]["name"]+": ", download_task.get_progress())
-closing(api)
-# download_task= getDownloader(contractMain[len(contractMain)-1])
-# with closing(api):
-#     while not download_task.is_finished():
-#         api.wait_update()
-#         print("progress: ", download_task.get_progress())
+            print("["+str(curIdx+1)+"/"+str(maxIdx+1)+"]"+contractList[curIdx]["name"]+contractList[curIdx]["code"]+": ", download_task.get_progress())
+print("=== 下载进程结束 ===")
