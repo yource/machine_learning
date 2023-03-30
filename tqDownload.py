@@ -60,18 +60,44 @@ contracts = [
                 "2301","2305"]
     }
 ]
+
+contracts1 = [
+    {
+        "type":"油脂油料", "name":"豆一", "code":"a", "exchange":"DCE", 
+        "list":["1605","1609",
+                "1701","1705","1709","1801","1805","1809","1901","1905","1909",
+                "2001","2005","2009","2101","2105","2109","2201","2205","2209",
+                "2301","2305"]
+    },{
+        "type":"油脂油料", "name":"豆二", "code":"b", "exchange":"DCE", 
+        "list":["1605","1609",
+                "1701","1705","1709","1801","1805","1809","1901","1905","1909",
+                "2001","2005","2009","2101","2105","2109","2201","2205","2209",
+                "2301","2305"]
+    }
+]
+
 contractList = []
-for m,item in enumerate(contracts):
+for m,item in enumerate(contracts1):
     for n,subItem in enumerate(item["list"]):
         contractList.append({
             "exchange": item["exchange"],
-            "name": item["name"],
-            "code": item["code"]+subItem
+            "name": item["name"]+subItem,
+            "code": item["code"]+subItem,
+            "sec": 5*60,
+            "filename": "./data/contract5min/"+item["code"]+"/"+item["code"]+subItem+"_5min.csv"
+        })
+        contractList.append({
+            "exchange": item["exchange"],
+            "name": item["name"]+subItem,
+            "code": item["code"]+subItem,
+            "sec": 24*60*60,
+            "filename": "./data/contractDaily/"+item["code"]+"/"+item["code"]+subItem+"_5min.csv"
         })
 
 # print("contractList",contractList)
 
-# 各种类主连5分钟
+# 主连
 contractMain = [
     { "type":"黑色金属", "name":"铁矿石", "code":"i", "exchange":"DCE" },
     { "type":"黑色金属", "name":"螺纹钢", "code":"rb", "exchange":"SHFE" },
@@ -132,12 +158,12 @@ contractMain = [
 
 api = TqApi(auth=TqAuth("18655533530", "YangXiang88"))
 
-# 下载示例
+# # 下载示例
 # download_tasks={}
-# 下载从 2018-01-01 到 2018-09-01 的 SR901 日线数据
+# # # 下载从 2018-01-01 到 2018-09-01 的 SR901 日线数据
 # download_tasks["SR_daily"] = DataDownloader(api, symbol_list="CZCE.SR901", dur_sec=24*60*60,
-#                     start_dt=date(2018, 1, 1), end_dt=date(2018, 9, 1), csv_file_name="SR901_daily.csv")
-# 下载从 2017-01-01 到 2018-09-01 的 rb主连 5分钟线数据
+#                     start_dt=date(2016, 1, 1), end_dt=date(2018, 9, 1), csv_file_name="SR901_daily.csv")
+# # # 下载从 2017-01-01 到 2018-09-01 的 rb主连 5分钟线数据
 # download_tasks["j1901_5min"] = DataDownloader(api, symbol_list="DCE.j1901", dur_sec=5*60,
 #                     start_dt=date(2016, 1, 1),end_dt=date(2023, 3, 29),  csv_file_name="./data/test/j1901_5min.csv")
 # with closing(api):
@@ -146,10 +172,10 @@ api = TqApi(auth=TqAuth("18655533530", "YangXiang88"))
 #         print("progress: ", { k:("%.2f%%" % v.get_progress()) for k,v in download_tasks.items() })
 
 def getDownloader(ct):
-    return DataDownloader(api, dur_sec = 5*60,
+    return DataDownloader(api, dur_sec = ct["sec"],
                           symbol_list = ct["exchange"]+"."+ct["code"],
                           start_dt = date(2016, 1, 1), end_dt = date(2023, 3, 29), 
-                          csv_file_name = "./data/contract5min/"+ct["code"]+"_5min.csv")
+                          csv_file_name = ct["filename"])
 
 maxIdx = len(contractList)-1
 curIdx = 0
