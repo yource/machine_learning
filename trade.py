@@ -1,3 +1,17 @@
+'''
+样本->目标 思路
+半小时数据 - 4小时预测半小时 是否上涨/下降1%
+5分钟数据 - 过去4小时预测未来2小时的平均价
+
+样本是否重复 训练是否打乱顺序
+归一化的平均值mean和标准差std：全部数据 或 每个合约
+时间的周期：一年 3个月
+选取多长时间的训练数据
+是否使用LSTM
+
+
+'''
+
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
@@ -21,6 +35,7 @@ df = dataframe.dropna()
 # print(plot_features.head)
 # plot_features.plot()
 # plt.show()
+# plt.savefig('1.png')
 
 # 选取数据
 df = df[['open','close','high','low','volume','open_interest','money']]
