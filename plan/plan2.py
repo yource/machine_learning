@@ -19,14 +19,16 @@ files = {
 }
 
 contract = 'c'
-# 读取文件 选取数据
+print("##### 读取文件 选取数据")
 df = pd.read_csv(files[contract])
 cols = df.columns # cols 2:open 3:high 4:low 5:close 6:volume 7:open_oi 8:close_oi
-df = df[[cols[0],cols[2],cols[3],cols[4],cols[5],cols[6],cols[7],cols[8]]]
-df = df[1:]
-# 检查数据错误 最大值最小值 
-# print(df.head)
-# print(df.describe().transpose())
+features = df[[cols[2],cols[3],cols[4],cols[5],cols[6],cols[7],cols[8]]]
+features.index = df["datetime"]
+features = features[1:]
+df = features
+print("##### 检查数据错误 最大值最小值") 
+print(df.head)
+print(df.describe().transpose())
 
 # 整体作图
 def makeFig():
@@ -39,16 +41,28 @@ def makeFig():
     fig.savefig('./pics/'+dataDict+contract+'.png')
 # makeFig()
 
-# 拆分数据 训练集、验证集、测试集
-n = len(df)
-df_train = df[0:int(n*0.7)]
-df_val = df[int(n*0.7):int(n*0.9)]
-df_test = df[int(n*0.9):]
-num_features = df.shape[1]
-print(n,len(df_train),len(df_val),len(df_test))
-print(num_features)
+print("##### 数据归一化 减去平均值、除以标准差")
+n = int(df.shape[0])
+df_train = df[:int(0.75 * n)]
+train_mean = df_train.mean(axis=0)
+train_std = df_train.std(axis=0)
+df = (df-train_mean)/train_std
+print("##### 拆分数据 训练集、验证集、测试集")
+all_data = pd.DataFrame(df)
+print(all_data.head())
+train_data = all_data.loc[0 : int(0.75 * n) - 1]
+val_data = all_data.loc[int(0.75 * n):int(0.9 * n) - 1]
+test_data = all_data.loc[int(0.9 * n):]
+print(train_data.shape)
+print(val_data.shape)
+print(test_data.shape)
 
-# 数据归一化 减去平均值、除以标准差
-# train_mean = df_train.mean()
-# train_std = df_train.std()
-# df_train = (df_train-train_mean)/train_std
+
+num_features = df.shape[1]
+step = 6
+past = 6*8
+future = 6*2
+learning_rate = 0.001
+batch_size = 256
+epochs = 10
+start = past+future
