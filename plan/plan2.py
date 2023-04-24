@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 # 设置浮点数精度
-pd.set_option("display.float_format", "{:.6f}".format) 
+# pd.set_option("display.float_format", "{:.6f}".format) 
 
 # 数据类型
 dataDict = "main5min/"
@@ -48,14 +48,15 @@ train_mean = df_train.mean(axis=0)
 train_std = df_train.std(axis=0)
 df = (df-train_mean)/train_std
 print("##### 拆分数据 训练集、验证集、测试集")
-all_data = pd.DataFrame(df)
-print(all_data.head())
-train_data = all_data.loc[0 : int(0.75 * n) - 1]
-val_data = all_data.loc[int(0.75 * n):int(0.9 * n) - 1]
-test_data = all_data.loc[int(0.9 * n):]
+all_data = np.array(df, dtype=np.float32)
+print(all_data)
+train_data = all_data[0 : int(0.75 * n) - 1]
+val_data = all_data[int(0.75 * n):int(0.9 * n) - 1]
+test_data = all_data[int(0.9 * n):]
 print(train_data.shape)
 print(val_data.shape)
 print(test_data.shape)
+
 
 
 num_features = df.shape[1]
