@@ -85,7 +85,7 @@ print("##### 生成窗口数据")
 lookback = 24
 delay=6
 step=1
-offset=0
+offset=2
 train_x,train_y = generator(train_data,lookback,delay,step,offset)
 val_x,val_y = generator(val_data,lookback,delay,step,offset)
 print(train_x.shape)
@@ -94,13 +94,15 @@ print(val_x.shape)
 print(val_y.shape)
 
 model = Sequential([
-    layers.LSTM(32, return_sequences=True),
-    layers.Dense(units=1)
+    layers.LSTM(32, input_shape=(None,train_x.shape[-1]) ,return_sequences=True),
+    layers.Dense(1)
 ])
 early_stopping = keras.callbacks.EarlyStopping(monitor='val_loss',patience=2,mode='min')
-model.compile(loss=keras.losses.MeanSquaredError(),
-            optimizer=keras.optimizers.Adam(),
-            metrics=[keras.metrics.MeanAbsoluteError()])
-history = model.fit(train_x,train_y, epochs=20,
-                    validation_data=val_x,
-                    callbacks=[early_stopping])
+# loss = keras.losses.MeanSquaredError()
+# optimizer=keras.optimizers.Adam()
+# metrics=[keras.metrics.MeanAbsoluteError()]
+# callbacks=[early_stopping]
+model.compile(loss='mae',optimizer=keras.optimizers.RMSprop())
+history = model.fit(train_x,train_y, 
+                    epochs=20, batch_size=256,
+                    validation_data=(val_x,val_y))
