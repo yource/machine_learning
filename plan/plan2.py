@@ -1,11 +1,16 @@
 '''
 5分钟 
-标准化：简单平均数
-拆分数据：一次性拆分、生成
+简单平均数,
+无时间,
+少量指标,
+一次性拆分、生成
 '''
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
+import keras
+from keras import layers
+from keras.models import Sequential
 # 设置浮点数精度
 # pd.set_option("display.float_format", "{:.6f}".format) 
 
@@ -22,7 +27,7 @@ contract = 'c'
 print("##### 读取文件 选取数据")
 df = pd.read_csv(files[contract])
 cols = df.columns # cols 2:open 3:high 4:low 5:close 6:volume 7:open_oi 8:close_oi
-features = df[[cols[2],cols[3],cols[4],cols[5],cols[6],cols[7],cols[8]]]
+features = df[[cols[2],cols[3],cols[4],cols[5]]]
 features.index = df["datetime"]
 features = features[1:]
 df = features
@@ -56,14 +61,46 @@ test_data = all_data[int(0.9 * n):]
 print(train_data.shape)
 print(val_data.shape)
 print(test_data.shape)
+'''
+根据过去的lookback期数据 预测delay期之后的数据
+隔step取一个有效值
+隔offset个数据生成一个窗口 0代表各window不交叉
+'''
+def generator(data,lookback,delay,step=6,offset=0):
+    data_len = len(data)
+    window_size = lookback+delay  # 每个窗口用到的数据量
+    if offset==0:
+        offset = window_size
+    window_count= (data_len-window_size)//offset # 可以切分出多少个窗口
+    if(step==0):
+        step=1
+    samples = np.zeros((window_count, lookback//step, data.shape[-1]))
+    targets = np.zeros((window_count,))
+    for i in range(0,window_count):
+        window = data[offset*i:offset*i+window_size]
+        samples[i] = window[0:lookback:step]
+        targets[i] = window[lookback+delay-1][0]
+    return samples,targets
+print("##### 生成窗口数据")
+lookback = 24
+delay=6
+step=1
+offset=0
+train_x,train_y = generator(train_data,lookback,delay,step,offset)
+val_x,val_y = generator(val_data,lookback,delay,step,offset)
+print(train_x.shape)
+print(train_y.shape)
+print(val_x.shape)
+print(val_y.shape)
 
-
-
-num_features = df.shape[1]
-step = 6
-past = 6*8
-future = 6*2
-learning_rate = 0.001
-batch_size = 256
-epochs = 10
-start = past+future
+model = Sequential([
+    layers.LSTM(32, return_sequences=True),
+    layers.Dense(units=1)
+])
+early_stopping = keras.callbacks.EarlyStopping(monitor='val_loss',patience=2,mode='min')
+model.compile(loss=keras.losses.MeanSquaredError(),
+            optimizer=keras.optimizers.Adam(),
+            metrics=[keras.metrics.MeanAbsoluteError()])
+history = model.fit(train_x,train_y, epochs=20,
+                    validation_data=val_x,
+                    callbacks=[early_stopping])

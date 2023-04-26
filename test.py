@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 
-a = np.array([1,2,3,4])
-print (a[:1])
-print (a[1:])
+a = np.zeros((100,6))
+for i in range(0,100):
+    a[i] = [i+0.1,i+0.2,i+0.3,i+0.4,9+0.5,i+0.6]
+
+print(a)
