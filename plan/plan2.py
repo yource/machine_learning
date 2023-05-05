@@ -21,9 +21,11 @@ dataDict = "main5min/"
 files = {
     "c" : './data/'+dataDict+'c_main_5min.csv',  # 玉米
     "cs": './data/'+dataDict+'cs_main_5min.csv', # 淀粉
+    "i": './data/'+dataDict+'i_main_5min.csv', # 淀粉
+    "j": './data/'+dataDict+'j_main_5min.csv', # 淀粉
 }
 
-contract = 'c'
+contract = 'i'
 print("##### 读取文件 选取数据")
 df = pd.read_csv(files[contract])
 cols = df.columns # cols 2:open 3:high 4:low 5:close 6:volume 7:open_oi 8:close_oi
@@ -94,15 +96,14 @@ print(val_x.shape)
 print(val_y.shape)
 
 model = Sequential([
-    layers.LSTM(32, input_shape=(None,train_x.shape[-1]) ,return_sequences=True),
+    # layers.LSTM(32, input_shape=(None,train_x.shape[-1]) ,return_sequences=True),
+    layers.LSTM(32, input_shape=(None,train_x.shape[-1])),
     layers.Dense(1)
 ])
-early_stopping = keras.callbacks.EarlyStopping(monitor='val_loss',patience=2,mode='min')
-# loss = keras.losses.MeanSquaredError()
-# optimizer=keras.optimizers.Adam()
+# early_stopping = keras.callbacks.EarlyStopping(monitor='val_loss',patience=2,mode='min')
 # metrics=[keras.metrics.MeanAbsoluteError()]
 # callbacks=[early_stopping]
 model.compile(loss='mae',optimizer=keras.optimizers.RMSprop())
 history = model.fit(train_x,train_y, 
-                    epochs=20, batch_size=256,
+                    epochs=20, batch_size=128,
                     validation_data=(val_x,val_y))
