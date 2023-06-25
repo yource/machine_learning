@@ -10,7 +10,7 @@ Tushare
 
 '''
 
-import tushare as ts
+import test.tushare as ts
 
 ts.set_token('857cf934580eba9e837dae6c05e24696c8f500fc2b153e9ecf9c97c0')
 pro = ts.pro_api()
