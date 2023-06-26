@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
+import util
 
 '''
 分析六大品种
@@ -26,33 +27,21 @@ close_oi: K线结束时刻的持仓量
 varieties = [
     {
         "name":"甲醇", "code": "MA","exchange": "CZCE",
-        "file_5min": "data/main5min/MA_main_5min.csv",
-        "file_daily": "data/mainDaily/MA_main_daily.csv"
     },
     {
         "name":"PVC","code": "v","exchange": "DCE",
-        "file_5min": "data/main5min/v_main_5min.csv",
-        "file_daily": "data/mainDaily/v_main_daily.csv"
     },
     {
         "name":"聚丙烯","code": "pp","exchange": "DCE",
-        "file_5min": "data/main5min/pp_main_5min.csv",
-        "file_daily": "data/mainDaily/pp_main_daily.csv"
     },
     {
         "name":"豆粕","code": "m","exchange": "DCE",
-        "file_5min": "data/main5min/m_main_5min.csv",
-        "file_daily": "data/mainDaily/m_main_daily.csv"
     },
     {
         "name":"菜粕","code": "RM","exchange": "CZCE",
-        "file_5min": "data/main5min/RM_main_5min.csv",
-        "file_daily": "data/mainDaily/RM_main_daily.csv"
     },
     {
         "name":"塑料","code": "l","exchange": "DCE",
-        "file_5min": "data/main5min/l_main_5min.csv",
-        "file_daily": "data/mainDaily/l_main_daily.csv"
     }
 ]
 
@@ -74,16 +63,33 @@ def makeFigs():
         makeFig(item["file_daily"],'pics/mainDaily/'+item["code"]+'.png')
 
 # 读取文件 处理数据
-def getData(file):
+def getData(code, min):
+    file = "data/main/"+code+"_"+str(min)+"min.csv"
     df = pd.read_csv(file)
     cols = df.columns
     df = df[[cols[2],cols[3],cols[4],cols[5],cols[6],cols[7],cols[8]]]
     df = df[1:]
-    # 检查数据错误 最大值最小值 
+    # print("##### 检查数据错误 最大值最小值")
     # print(df.head)
     # print(df.describe().transpose())
-    # print(len(df[df[cols[6]]<1]))
+    
+    n = len(df)
+    # print("##### 数据归一化 减去平均值、除以标准差")
+    # data_train = df[0: int(0.75 * n)]
+    # train_mean = data_train.mean(axis=0)
+    # train_std = data_train.std(axis=0)
+    # df = (df-train_mean)/train_std
+
+    print("##### 生成 样本-目标")
+    samples, targets = util.generator(df,24,1,6,0)
+
+    print("##### 拆分数据 训练集、验证集、测试集")
+    data_train = df[0: int(0.7 * n)]
+    data_val = df[int(0.7 * n):int(0.9 * n)]
+    data_test = df[int(0.9 * n):]
+    
+    
 
 
-getData(varieties[0]["file_5min"])
+getData(varieties[0]["code"],5)
 
