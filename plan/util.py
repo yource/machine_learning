@@ -19,7 +19,7 @@ def makeFig(file,filePic):
 隔step取一个有效值
 隔offset个数据生成一个窗口 0代表各window不交叉
 '''
-def generator(data, lookback, delay, step=1, offset=0,normalize=None):
+def generator(data, lookback, delay, step=1, offset=0,normalize=None,targetLabel=False):
     data_len = len(data)
     window_size = lookback+delay  # 每个窗口用到的数据量
     if offset == 0:
@@ -37,10 +37,11 @@ def generator(data, lookback, delay, step=1, offset=0,normalize=None):
         window_target_high = (window_target[0]+window_target[1]+window_target[3])/3
         window_target_low = (window_target[0]+window_target[2]+window_target[3])/3
         window_label = 0
-        if(window_target_low>window_sample_value and window_target_high>window_sample_value*1.01):
-            window_label = 1
-        elif(window_target_low<window_sample_value*0.99 and window_target_high<window_sample_value):
-            window_label = -1
+        if(targetLabel is True):
+            if(window_target_low>window_sample_value and window_target_high>window_sample_value*1.01):
+                window_label = 1
+            elif(window_target_low<window_sample_value*0.99 and window_target_high<window_sample_value):
+                window_label = -1
         
         if(normalize=='SMA'):
             window_mean = window_samples.mean(axis=0)
@@ -51,14 +52,16 @@ def generator(data, lookback, delay, step=1, offset=0,normalize=None):
             window = (window-window_mean)/window_std
         
         samples[i] = window[0:lookback:step]
-        # targets[i] = window[lookback+delay-1][0]
-        targets[i] = window_label
+        if(targetLabel is True):
+            targets[i] = window_label
+        else:
+            targets[i] = window_target[3]
     return samples, targets
 
 
 # 读取文件 处理数据
 # normalize: None Simple SMA简单移动平均 WMA权重易懂平均 EMA指数移动平均
-def getData(code, min, normalize):
+def getData(code, min, normalize, targetLabel=False):
     file = "data/main/"+code+"_"+str(min)+"min.csv"
     df = pd.read_csv(file)
     cols = df.columns
@@ -88,11 +91,12 @@ def getData(code, min, normalize):
     delay = 2
     step = 1
     offset = 2
-    train_x, train_y = generator(data_train,lookback=lookback,delay=delay,step=step,offset=offset,normalize=normalize)
-    val_x, val_y = generator(data_val,lookback=lookback,delay=delay,step=step,offset=offset,normalize=normalize)
-    test_x, test_y = generator(data_test,lookback=lookback,delay=delay,step=step,offset=offset,normalize=normalize)
+    train_x, train_y = generator(data_train,lookback=lookback,delay=delay,step=step,offset=offset,normalize=normalize,targetLabel=targetLabel)
+    val_x, val_y = generator(data_val,lookback=lookback,delay=delay,step=step,offset=offset,normalize=normalize,targetLabel=targetLabel)
+    test_x, test_y = generator(data_test,lookback=lookback,delay=delay,step=step,offset=offset,normalize=normalize,targetLabel=targetLabel)
     # len1 = len(np.where(train_y<0)[0])
     # len2 = len(np.where(train_y>0)[0])
     # print(str(len1)+"+"+str(len2)+"="+str(len1+len2))
     return (train_x, train_y),(val_x, val_y),(test_x, test_y)
+
 

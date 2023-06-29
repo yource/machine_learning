@@ -33,4 +33,4 @@ varieties = [
     {"name": "塑料", "code": "l", "exchange": "DCE"},
 ]
 
-(train_x, train_y), (val_x, val_y), (test_x, test_y) = util.getData(varieties[0]["code"], 15, None)
+(train_x, train_y), (val_x, val_y), (test_x, test_y) = util.getData(varieties[0]["code"], 15, None, False)
