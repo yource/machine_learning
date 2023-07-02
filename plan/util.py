@@ -28,7 +28,11 @@ def generator(data, lookback, delay, step=1, offset=0,normalize=None,targetLabel
     if(step == 0):
         step = 1
     samples = np.zeros((window_count, lookback//step, data.shape[-1]))
-    targets = np.zeros((window_count,))
+    
+    if(targetLabel is True):
+        targets = np.zeros((window_count,3))
+    else:
+        targets = np.zeros((window_count,))
     for i in range(0, window_count):
         window = data[offset*i:offset*i+window_size]
         window_samples = window[0:lookback]
@@ -36,12 +40,12 @@ def generator(data, lookback, delay, step=1, offset=0,normalize=None,targetLabel
         window_target = window[lookback+delay-1]
         window_target_high = (window_target[0]+window_target[1]+window_target[3])/3
         window_target_low = (window_target[0]+window_target[2]+window_target[3])/3
-        window_label = 0
+        window_label = np.array([0,1,0]) #平
         if(targetLabel is True):
             if(window_target_low>window_sample_value and window_target_high>window_sample_value*1.01):
-                window_label = 1
+                window_label = np.array([0,0,1]) #涨
             elif(window_target_low<window_sample_value*0.99 and window_target_high<window_sample_value):
-                window_label = -1
+                window_label = np.array([1,0,0]) #跌
         
         if(normalize=='SMA'):
             window_mean = window_samples.mean(axis=0)
