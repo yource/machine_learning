@@ -1,5 +1,5 @@
 '''
-PLAN_01
+PLAN_03
 1. 只用 open/high/low/close 数据
 2. 不做归一化 
 3. 分析历史样本涨跌幅度 制定对应的标签
@@ -51,8 +51,8 @@ for i in range(0, window_count):
     samples[i] = window[0:lookback:step]
     target_percents[i] = window_target_percent
 
-target_percent_low  = np.percentile(target_percents, 30)
-target_percent_high = np.percentile(target_percents, 70)
+target_percent_low  = np.percentile(target_percents, 25)
+target_percent_high = np.percentile(target_percents, 75)
 target_labels = np.zeros((len(samples),3))
 
 for i,y in enumerate(target_percents):
@@ -89,7 +89,7 @@ model = Sequential([
 # callbacks=[early_stopping]
 model.compile(loss='categorical_crossentropy',optimizer='rmsprop',metrics=['accuracy'])
 history = model.fit(train_x,train_y, 
-                    epochs=100, batch_size=256,
+                    epochs=50, batch_size=128,
                     validation_data=(val_x,val_y))
 
 predictions = model.predict(test_x)
@@ -107,6 +107,8 @@ for i,y in enumerate(predictions):
 for i in range(0,testLen):
     if(test_y_num[i] != 1):
         test += 1
+        print("test y", test_y[i])
+        print("pred", predictions[i])
     if(pred_y_num[i] != 1):
         pred += 1
         if(test_y_num[i] == pred_y_num[i]):
