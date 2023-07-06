@@ -6,6 +6,12 @@ PLAN_03
 ------
 甲醇_MA VC_v 聚丙烯_pp 豆粕_m 菜粕_RM 塑料_l
 锰硅_SM 鸡蛋_jd 乙二醇_eg 螺纹钢_rb 热卷_hc 燃油_fu 玻璃_FG
+
+不去除首条数据 去除首个窗口
+增加交易量
+各标签数量一致
+test结果细致分析
+预测结果结合百分数
 '''
 import numpy as np
 import pandas as pd
@@ -32,7 +38,7 @@ len_train = int(len_data*percent_train)
 隔offset个数据生成一个窗口 0代表各window不交叉
 '''
 print("##### 生成 样本-目标")
-lookback = 6; delay = 2; step = 1; offset = 3
+lookback = 18; delay = 2; step = 1; offset = 3
 window_size = lookback+delay  # 每个窗口用到的数据量
 if offset == 0:
     offset = window_size
@@ -62,8 +68,8 @@ n_train = int(percent_train * n)
 n_val = int(percent_val * n)
 
 target_percent_train = target_percents[:n_train]
-target_percent_low  = np.percentile(target_percent_train, 33)
-target_percent_high = np.percentile(target_percent_train, 66)
+target_percent_low  = np.percentile(target_percent_train, 40)
+target_percent_high = np.percentile(target_percent_train, 75)
 print("target_percent_low",target_percent_low)
 print("target_percent_high",target_percent_high)
 target_labels = np.zeros((window_count,3))
@@ -90,16 +96,30 @@ print("val_x",val_x.shape)
 print("test_x",test_x.shape)
 
 model = Sequential([
-    layers.LSTM(32, input_shape=(None,train_x.shape[-1]) ,return_sequences=True),
-    layers.LSTM(32, input_shape=(None,train_x.shape[-1])),
+    layers.Flatten(),
+    layers.Dense(128),
+    layers.BatchNormalization(),
+    layers.Activation('relu'),
+    layers.Dropout(0.3),
+    layers.Dense(64),
+    layers.BatchNormalization(),
+    layers.Activation('relu'),
+    layers.Dropout(0.25),
     layers.Dense(3, activation='softmax')
 ])
+
+
+# model = Sequential([
+#     layers.LSTM(32, input_shape=(None,train_x.shape[-1]) ,return_sequences=True),
+#     layers.LSTM(32, input_shape=(None,train_x.shape[-1])),
+#     layers.Dense(3, activation='softmax')
+# ])
 # early_stopping = keras.callbacks.EarlyStopping(monitor='val_loss',patience=2,mode='min')
 # metrics=[keras.metrics.MeanAbsoluteError()]
 # callbacks=[early_stopping]
-model.compile(loss='categorical_crossentropy',optimizer='rmsprop',metrics=['accuracy'])
+model.compile(loss='categorical_crossentropy',optimizer='adam',metrics=['accuracy'])
 history = model.fit(train_x,train_y, 
-                    epochs=50, batch_size=256,
+                    epochs=60, batch_size=1024,
                     validation_data=(val_x,val_y))
 
 predictions = model.predict(test_x)
