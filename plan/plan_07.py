@@ -155,20 +155,21 @@ def build_model(hp):
 tuner = kt.Hyperband(
     build_model,
     objective='val_accuracy',
-    max_epochs=1000,
+    max_epochs=5000,
     factor=3,
     directory='kt_data',
     project_name=project_name,
 )
 print(tuner.search_space_summary())
 stop_early = keras.callbacks.EarlyStopping(monitor='val_loss', patience=5)
-tuner.search(train_x,train_y, epochs=1000, validation_data=(val_x,val_y), callbacks=[stop_early])
+tuner.search(train_x,train_y, epochs=5000, validation_data=(val_x,val_y), callbacks=[stop_early])
 print("########## tuner.results_summary ##########")
 print(tuner.results_summary())
 
 # 使用从搜索中获得的超参数找到训练模型的最佳周期数
 best_hp=tuner.get_best_hyperparameters(num_trials=1)[0]
 best_model = build_model(best_hp)
+best_model.build()
 print("########## best_model.summary ##########")
 print(best_model.summary())
 x_all = np.concatenate((train_x, val_x))
@@ -187,3 +188,194 @@ hypermodel.save("model/"+project_name)
 # newModel = keras.models.load_model("./model/mnist")
 # print(newModel.summary())
 
+########## tuner.results_summary ##########
+'''
+Results summary
+Results in kt_data/plan_07_001
+Showing 10 best trials
+<keras_tuner.engine.objective.Objective object at 0x7fc569b6a220>
+Trial summary
+Hyperparameters:
+units: 256
+normal1: True
+active1: False
+dropout1: False
+normal2: False
+active2: False
+dropout2: False
+lr: 0.00034929128241395816
+rate1: 0.3
+rate2: 0.4
+tuner/epochs: 13
+tuner/initial_epoch: 5
+tuner/bracket: 6
+tuner/round: 2
+tuner/trial_id: 2992
+Score: 0.998196005821228
+--------------------------------
+Trial summary
+Hyperparameters:
+units: 416
+normal1: True
+active1: False
+dropout1: True
+normal2: False
+active2: False
+dropout2: False
+lr: 0.0002693387023501433
+rate1: 0.45
+rate2: 0.4
+tuner/epochs: 38
+tuner/initial_epoch: 13
+tuner/bracket: 6
+tuner/round: 3
+tuner/trial_id: 1145
+Score: 0.9957907199859619
+Trial summary
+Hyperparameters:
+units: 448
+normal1: True
+active1: False
+dropout1: False
+normal2: False
+active2: True
+dropout2: False
+lr: 0.00011940882987867163
+rate1: 0.45
+rate2: 0.15
+tuner/epochs: 38
+tuner/initial_epoch: 13
+tuner/bracket: 5
+tuner/round: 2
+tuner/trial_id: 1590
+Score: 0.9951894283294678
+--------------------------------
+Trial summary
+Hyperparameters:
+units: 224
+normal1: True
+active1: False
+dropout1: False
+normal2: False
+active2: False
+dropout2: False
+lr: 0.0010145077995017421
+rate1: 0.4
+rate2: 0.25
+tuner/epochs: 38
+tuner/initial_epoch: 13
+tuner/bracket: 6
+tuner/round: 3
+tuner/trial_id: 1134
+Score: 0.9933854341506958
+--------------------------------
+Trial summary
+Hyperparameters:
+units: 256
+normal1: True
+active1: False
+dropout1: False
+normal2: False
+active2: False
+dropout2: False
+lr: 0.0012916500815288833
+rate1: 0.25
+rate2: 0.5
+tuner/epochs: 5
+tuner/initial_epoch: 0
+tuner/bracket: 5
+tuner/round: 0
+Score: 0.9933854341506958
+--------------------------------
+Trial summary
+Hyperparameters:
+units: 288
+normal1: True
+active1: False
+dropout1: False
+normal2: True
+active2: False
+dropout2: True
+lr: 0.001382827869491224
+rate1: 0.5
+rate2: 0.35
+tuner/epochs: 5
+tuner/initial_epoch: 0
+tuner/bracket: 5
+tuner/round: 0
+Score: 0.9927841424942017
+--------------------------------
+Trial summary
+Hyperparameters:
+units: 352
+normal1: True
+active1: False
+dropout1: False
+normal2: False
+active2: False
+dropout2: False
+lr: 0.00018723379392602342
+rate1: 0.15
+rate2: 0.15
+tuner/epochs: 13
+tuner/initial_epoch: 5
+tuner/bracket: 5
+tuner/round: 1
+tuner/trial_id: 1376
+Score: 0.9927841424942017
+--------------------------------
+Trial summary
+Hyperparameters:
+units: 448
+normal1: True
+active1: False
+dropout1: True
+normal2: True
+active2: False
+dropout2: False
+lr: 0.005322635881784047
+rate1: 0.1
+rate2: 0.1
+tuner/epochs: 38
+tuner/initial_epoch: 0
+tuner/bracket: 3
+tuner/round: 0
+Score: 0.9921827912330627
+--------------------------------
+Trial summary
+Hyperparameters:
+units: 96
+normal1: True
+active1: False
+dropout1: True
+normal2: True
+active2: False
+dropout2: False
+lr: 0.008845571743601299
+rate1: 0.15
+rate2: 0.3
+tuner/epochs: 5
+tuner/initial_epoch: 0
+tuner/bracket: 5
+tuner/round: 0
+Score: 0.9915814995765686
+--------------------------------
+Trial summary
+Hyperparameters:
+units: 160
+normal1: True
+active1: False
+dropout1: False
+normal2: False
+active2: True
+dropout2: True
+lr: 0.0007315903709982806
+rate1: 0.25
+rate2: 0.1
+tuner/epochs: 13
+tuner/initial_epoch: 5
+tuner/bracket: 5
+tuner/round: 1
+tuner/trial_id: 5596
+Score: 0.9915814995765686
+'''
