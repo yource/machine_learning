@@ -231,6 +231,7 @@ tuner/bracket: 6
 tuner/round: 3
 tuner/trial_id: 1145
 Score: 0.9957907199859619
+--------------------------------
 Trial summary
 Hyperparameters:
 units: 448
