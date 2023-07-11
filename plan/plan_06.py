@@ -39,7 +39,7 @@ len_train = int(len_data*percent_train)
 隔offset个数据生成一个窗口 0代表各window不交叉
 '''
 print("##### 生成 样本-目标")
-lookback = 18; delay = 2; step = 1; offset = 3
+lookback = 12; delay = 2; step = 1; offset = 3
 window_size = lookback+delay  # 每个窗口用到的数据量
 if offset == 0:
     offset = window_size
@@ -69,8 +69,8 @@ n_train = int(percent_train * n)
 n_val = int(percent_val * n)
 
 target_percent_train = target_percents[:n_train]
-target_percent_low  = np.percentile(target_percent_train, 40)
-target_percent_high = np.percentile(target_percent_train, 75)
+target_percent_low  = np.percentile(target_percent_train, 33)
+target_percent_high = np.percentile(target_percent_train, 66)
 print("target_percent_low",target_percent_low)
 print("target_percent_high",target_percent_high)
 target_labels = np.zeros((window_count,3))
@@ -101,11 +101,11 @@ model = Sequential([
     layers.Dense(128),
     layers.BatchNormalization(),
     layers.Activation('relu'),
-    layers.Dropout(0.3),
-    layers.Dense(64),
+    layers.Dropout(0.35),
+    layers.Dense(128),
     layers.BatchNormalization(),
     layers.Activation('relu'),
-    layers.Dropout(0.25),
+    layers.Dropout(0.3),
     layers.Dense(3, activation='softmax')
 ])
 
@@ -117,10 +117,11 @@ model = Sequential([
 # ])
 # early_stopping = keras.callbacks.EarlyStopping(monitor='val_loss',patience=2,mode='min')
 # metrics=[keras.metrics.MeanAbsoluteError()]
-# callbacks=[early_stopping]
-model.compile(loss='categorical_crossentropy',optimizer='adam',metrics=['accuracy'])
+# callbacks=[early_stopping] 
+# rmsprop adam
+model.compile(loss='categorical_crossentropy',optimizer='rmsprop',metrics=['accuracy'])
 history = model.fit(train_x,train_y, 
-                    epochs=60, batch_size=1024,
+                    epochs=100, batch_size=1024,
                     validation_data=(val_x,val_y))
 
 predictions = model.predict(test_x)
@@ -131,10 +132,17 @@ pred_y_num = np.zeros(testLen)
 pred = 0
 pred_right = 0
 pred_wrong = 0
+# 0负 1平 2盈
 for i,y in enumerate(test_y):
     test_y_num[i] = np.argmax(y)
 for i,y in enumerate(predictions):
-    pred_y_num[i] = np.argmax(y)
+    if(np.argmax(y)==0 and y[0]>0.4 and y[2]<0.3):
+        pred_y_num[i] = 0
+    elif(np.argmax(y)==2 and y[2]>0.4 and y[0]<0.3):
+        pred_y_num[i] = 2
+    else:
+        pred_y_num[i] = 1
+
 for i in range(0,testLen):
     if(test_y_num[i] != 1):
         test += 1
@@ -151,4 +159,4 @@ print(test,pred,pred_right,pred_wrong)
 
 
 # MA 956 1709 773 936
-# rb 944 1664 936 728
+# rb 944 1664 937 727
