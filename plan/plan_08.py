@@ -13,6 +13,8 @@ PLAN_03
 各标签对应的样本数量一致
 test结果细致分析
 预测结果结合百分数决定是否下手
+通过历史回测获取历史数据
+3年循环训练 验证模型
 '''
 import numpy as np
 import pandas as pd
@@ -68,7 +70,7 @@ for i in range(0, window_count):
     window_target_high = (window_target[0]+window_target[1]+window_target[3])/3
     window_target_low = (window_target[0]+window_target[2]+window_target[3])/3
     window_target_value = (((window_target[0]+window_target[1]+window_target[2])/3)+window_target[3]*2)/3
-    window_target_percent = int(((window_target_value-window_sample_value)/window_sample_value)*10000)
+    window_target_percent = int(((window_target_value-window_sample_value)/window_sample_value)*100000)
     samples[i] = window_samples
     target_percents[i] = window_target_percent
     

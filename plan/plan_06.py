@@ -17,6 +17,7 @@ test结果细致分析
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
+import keras
 from keras import layers
 from keras.models import Sequential
 
@@ -98,14 +99,14 @@ print("test_x",test_x.shape)
 
 model = Sequential([
     layers.Flatten(),
-    layers.Dense(128),
+    layers.Dense(128), #,kernel_regularizer=keras.regularizers.l2(0.0005)
     layers.BatchNormalization(),
-    layers.Activation('relu'),
-    layers.Dropout(0.35),
-    layers.Dense(128),
+    layers.Activation('swish'),
+    layers.Dropout(0.25),
+    layers.Dense(128), #,kernel_regularizer=keras.regularizers.l2(0.0005)
     layers.BatchNormalization(),
-    layers.Activation('relu'),
-    layers.Dropout(0.3),
+    layers.Activation('swish'),
+    layers.Dropout(0.2),
     layers.Dense(3, activation='softmax')
 ])
 
